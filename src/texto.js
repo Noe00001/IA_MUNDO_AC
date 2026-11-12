@@ -3,16 +3,18 @@ const path = require('node:path');
 
 const { DESCRIPCIONES_DIR } = require('./mundo');
 
+// Paso 1: Construir el mensaje de sistema pidiendo un párrafo en inglés (80-120 palabras) con los 5 colores
 function buildSystemMessage() {
   return [
     'Eres un asistente experto en arte visual y mundos imaginarios.',
     'Escribe un único párrafo en inglés de entre 80 y 120 palabras.',
     'Describe una imagen, incluyendo escena, elementos, iluminación, composición y estilo artístico; no escribas una historia.',
-    'Menciona los cinco colores del mundo.',
+    'Menciona explícitamente los cinco colores del mundo en inglés.',
     'No incluyas título, formato markdown ni texto escrito dentro de la imagen.',
   ].join(' ');
 }
 
+// Paso 2: Traducir los códigos de estado HTTP de Groq a mensajes claros en español
 function buildApiError(status) {
   if (status === 401 || status === 403) {
     return 'La clave de Groq no es válida o no tiene permisos. Revisa GROQ_API_KEY en .env.';
@@ -26,13 +28,16 @@ function buildApiError(status) {
   return `Groq devolvió un error HTTP ${status}. Revisa la configuración y vuelve a intentarlo.`;
 }
 
+// Paso 3: Consultar la API de Groq enviando el JSON leído desde disco
 async function describirMundo(mundo) {
   const { GROQ_API_KEY, GROQ_MODEL } = process.env;
 
+  // Paso 3.1: Verificar que exista la clave de API antes de llamar a la red
   if (!GROQ_API_KEY) {
     throw new Error('Falta GROQ_API_KEY en el archivo .env.');
   }
 
+  // Paso 3.2: Enviar la petición POST con cabeceras, cuerpo JSON y timeout de 30 segundos
   let response;
   try {
     response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -61,10 +66,12 @@ async function describirMundo(mundo) {
     throw error;
   }
 
+  // Paso 3.3: Comprobar el estado HTTP de la respuesta
   if (!response.ok) {
     throw new Error(buildApiError(response.status));
   }
 
+  // Paso 3.4: Interpretar el JSON devuelto y validar que el contenido de texto no esté vacío
   let data;
   try {
     data = await response.json();
@@ -77,6 +84,7 @@ async function describirMundo(mundo) {
     throw new Error('La respuesta de Groq no contiene una descripción.');
   }
 
+  // Paso 3.5: Verificar la longitud de la descripción y recortar si supera 1500 caracteres
   const description = content.trim();
   if (description.length > 1500) {
     console.warn('Aviso: la descripción superó 1500 caracteres y se recortó.');
@@ -86,6 +94,7 @@ async function describirMundo(mundo) {
   return description;
 }
 
+// Paso 4: Guardar la descripción generada en descripciones/mundo_<id>.txt
 function saveDescripcion(id, texto) {
   fs.mkdirSync(DESCRIPCIONES_DIR, { recursive: true });
   const filePath = path.join(DESCRIPCIONES_DIR, `mundo_${id}.txt`);

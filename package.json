@@ -1,14 +1,19 @@
 {
   "name": "mundo-ia",
   "version": "1.0.0",
-  "description": "",
+  "description": "Generador de mundos imaginarios en Node.js con descripciones visuales de Groq e imágenes de Pollinations",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "test": "node --test"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "nodejs",
+    "groq",
+    "pollinations",
+    "ia"
+  ],
+  "author": "Salome Lopez Estrada (Noe0001)",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
